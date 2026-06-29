@@ -5,8 +5,9 @@ on:
     branches:
       - main
       - vibe/flapotter-mvp-8fd554
-    paths:
-      - 'flapotter/**'
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
 
 jobs:
   deploy:
@@ -28,7 +29,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: flapotter
+          path: .
 
       - name: Deploy to GitHub Pages
         id: deployment
