@@ -13,7 +13,7 @@
         }
         body {
             font-family: 'Comic Sans MS', cursive, sans-serif;
-            background: linear-gradient(to bottom, #87CEEB, #1E90FF);
+            background: #87CEEB;
             color: #333;
             overflow: hidden;
             user-select: none;
@@ -29,11 +29,35 @@
             position: relative;
             width: 500px;
             height: 600px;
-            background: linear-gradient(to bottom, #4682B4, #5F9EA0);
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAAH0CAYAAADL1t1KAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFuklEQVR4nO3d0XLkMAwD0f1/6WJ2m721tr7s3b2A0iS7XjG0j3P8z3P8zjH8zjH8zjH8zjH8zjH8zjH8zjH8zjH8zjH+90gIQCEwCD28sFQgAAAABJRU5ErkJggg==') repeat-x;
+            background-size: 500px 600px;
             border: 4px solid #2E8B57;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Fond personnalisé (eau + ciel) */
+        #game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 400px;
+            background: linear-gradient(to bottom, #87CEEB, #1E90FF);
+            z-index: 1;
+        }
+
+        #game-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(to bottom, #4682B4, #5F9EA0);
+            z-index: 1;
         }
 
         /* UI en haut */
@@ -83,28 +107,27 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
         }
 
-        /* Loutre (remplacée par un emoji 🦦) */
+        /* Loutre (sprite) */
         #loutre {
             position: absolute;
-            width: 60px;
-            height: 60px;
-            font-size: 50px;
+            width: 40px;
+            height: 40px;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAhklEQVR4nO3d0XLkIAwD0f1/6WJ2m721tr7s3b2A0iS7XjG0j3P8z3P8zjH8zjH8zjH8zjH8zjH8zjH8zjH8zjH8zjH+90gIQCEwCD28sFQgAAAABJRU5ErkJggg==') no-repeat center;
+            background-size: contain;
             z-index: 10;
             left: 100px;
             top: 300px;
             transition: transform 0.1s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        /* Obstacles (algues) - élargis et plus espacés */
+        /* Obstacles (algues) */
         .obstacle {
             position: absolute;
             width: 80px;
-            background: linear-gradient(to bottom, #228B22, #32CD32);
-            border-radius: 5px;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAcCAYAAABbUe3gAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAhklEQVR4nO3d0XLkIAwD0f1/6WJ2m721tr7s3b2A0iS7XjG0j3P8z3P8zjH8zjH8zjH8zjH8zjH8zjH8zjH8zjH+90gIQCEwCD28sFQgAAAABJRU5ErkJggg==') repeat-y;
+            background-size: 80px 128px;
             left: -80px;
+            z-index: 5;
         }
 
         .obstacle.top {
@@ -154,7 +177,7 @@
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: all 0.2s;
         }
 
         #info-popup button:hover {
@@ -287,23 +310,6 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
 
-        /* Nuages (décor) */
-        .cloud {
-            position: absolute;
-            background: white;
-            border-radius: 50px;
-            opacity: 0.8;
-            z-index: 1;
-        }
-
-        .cloud::before,
-        .cloud::after {
-            content: '';
-            position: absolute;
-            background: white;
-            border-radius: 50px;
-        }
-
         /* Sol (eau) */
         #ground {
             position: absolute;
@@ -313,6 +319,15 @@
             height: 20px;
             background: linear-gradient(to right, #5F9EA0, #4682B4);
             z-index: 5;
+        }
+
+        /* Nuages (décor) */
+        .cloud {
+            position: absolute;
+            background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAcCAYAAABbUe3gAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAhklEQVR4nO3d0XLkIAwD0f1/6WJ2m721tr7s3b2A0iS7XjG0j3P8z3P8zjH8zjH8zjH8zjH8zjH8zjH8zjH8zjH+90gIQCEwCD28sFQgAAAABJRU5ErkJggg==') no-repeat;
+            background-size: contain;
+            opacity: 0.8;
+            z-index: 1;
         }
     </style>
 </head>
@@ -327,8 +342,8 @@
             </div>
         </div>
 
-        <!-- Loutre (emoji 🦦) -->
-        <div id="loutre">🦦</div>
+        <!-- Loutre -->
+        <div id="loutre"></div>
 
         <!-- Skills -->
         <div id="skills">
@@ -368,23 +383,71 @@
         <div class="cloud" style="width: 150px; height: 50px; top: 200px; left: 50px;"></div>
     </div>
 
+    <!-- Sons intégrés (Web Audio API) -->
     <script>
+        // ==================== SOUNDS ====================
+        const sounds = {
+            jump: () => {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            },
+            collision: () => {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            },
+            info: () => {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc1 = audioCtx.createOscillator();
+                const osc2 = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc1.type = 'sine';
+                osc2.type = 'sine';
+                osc1.frequency.setValueAtTime(1000, audioCtx.currentTime);
+                osc2.frequency.setValueAtTime(1300, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc1.start();
+                osc2.start();
+                osc1.stop(audioCtx.currentTime + 0.2);
+                osc2.stop(audioCtx.currentTime + 0.2);
+            },
+            background: null
+        };
+
         // ==================== CONFIG ====================
         const CONFIG = {
-            gravity: 0.4,          // Gravité plus légère
-            jumpForce: -8,         // Saut moins puissant (plus contrôlable)
-            obstacleSpeed: 1.5,   // Vitesse initiale plus lente
-            obstacleGap: 200,     // Espacement entre les obstacles plus large
-            obstacleFrequency: 2000, // Fréquence des obstacles plus faible
-            obstacleWidth: 80,    // Largeur des obstacles
-            loutreWidth: 60,
-            loutreHeight: 60,
+            gravity: 0.4,
+            jumpForce: -8,
+            obstacleSpeed: 1.5,
+            obstacleGap: 200,
+            obstacleFrequency: 2000,
+            obstacleWidth: 80,
+            loutreWidth: 40,
+            loutreHeight: 40,
             gameWidth: 500,
             gameHeight: 600,
-            minObstacleHeight: 100, // Hauteur minimale des obstacles
-            maxObstacleHeight: 250, // Hauteur maximale des obstacles
-            speedIncrease: 0.0005, // Augmentation progressive de la vitesse
-            maxSpeed: 3.5         // Vitesse maximale
+            minObstacleHeight: 100,
+            maxObstacleHeight: 250,
+            speedIncrease: 0.0005,
+            maxSpeed: 3.5
         };
 
         // ==================== STATE ====================
@@ -405,52 +468,21 @@
             doubleJumpAvailable: false,
             slowMoActive: false,
             currentSpeed: CONFIG.obstacleSpeed,
-            easyMode: true, // Mode facile activé au début
-            easyModeTimer: 0
+            easyMode: true,
+            easyModeTimer: 0,
+            soundEnabled: true
         };
 
         // ==================== INFOS TECH ====================
         const INFOS_TECH = [
-            {
-                milestone: 5,
-                title: "Le HTML",
-                text: "Le HTML est le squelette d'une page web, comme les os pour un corps !"
-            },
-            {
-                milestone: 10,
-                title: "Le CSS",
-                text: "Le CSS, c'est la décoration : couleurs, polices, animations..."
-            },
-            {
-                milestone: 15,
-                title: "JavaScript",
-                text: "JavaScript, c'est le cerveau : il rend les pages interactives !"
-            },
-            {
-                milestone: 20,
-                title: "Les algorithmes",
-                text: "Un algorithme, c'est une recette de cuisine pour un ordinateur."
-            },
-            {
-                milestone: 25,
-                title: "Le Cloud",
-                text: "Le cloud, c'est comme un disque dur, mais sur Internet !"
-            },
-            {
-                milestone: 30,
-                title: "Git",
-                text: "Git, c'est un système pour sauvegarder et partager du code en équipe."
-            },
-            {
-                milestone: 35,
-                title: "Les API",
-                text: "Une API, c'est comme un menu au restaurant : tu commandes, le serveur te sert !"
-            },
-            {
-                milestone: 40,
-                title: "Le Responsive Design",
-                text: "Le responsive design, c'est adapter un site pour mobile, tablette et PC !"
-            }
+            { milestone: 5, title: "Le HTML", text: "Le HTML est le squelette d'une page web, comme les os pour un corps !" },
+            { milestone: 10, title: "Le CSS", text: "Le CSS, c'est la décoration : couleurs, polices, animations..." },
+            { milestone: 15, title: "JavaScript", text: "JavaScript, c'est le cerveau : il rend les pages interactives !" },
+            { milestone: 20, title: "Les algorithmes", text: "Un algorithme, c'est une recette de cuisine pour un ordinateur." },
+            { milestone: 25, title: "Le Cloud", text: "Le cloud, c'est comme un disque dur, mais sur Internet !" },
+            { milestone: 30, title: "Git", text: "Git, c'est un système pour sauvegarder et partager du code en équipe." },
+            { milestone: 35, title: "Les API", text: "Une API, c'est comme un menu au restaurant : tu commandes, le serveur te sert !" },
+            { milestone: 40, title: "Le Responsive Design", text: "Le responsive design, c'est adapter un site pour mobile, tablette et PC !" }
         ];
 
         // ==================== SKILLS ====================
@@ -482,21 +514,15 @@
 
         // ==================== INIT ====================
         function init() {
-            // Position initiale de la loutre
             loutre.style.left = `${CONFIG.gameWidth / 4}px`;
             loutre.style.top = `${state.loutreY}px`;
 
-            // Écouteurs d'événements
             document.addEventListener('keydown', handleKeyDown);
             gameContainer.addEventListener('click', handleClick);
             startButton.addEventListener('click', startGame);
             restartButton.addEventListener('click', restartGame);
             closeInfoButton.addEventListener('click', closeInfoPopup);
 
-            // Générer les nuages
-            generateClouds();
-
-            // Afficher l'écran de démarrage
             startScreen.style.display = 'flex';
             gameOverScreen.style.display = 'none';
         }
@@ -505,43 +531,29 @@
         function gameLoop(timestamp) {
             if (!state.isPlaying) return;
 
-            // Mettre à jour la position de la loutre
             updateLoutre();
-
-            // Générer des obstacles
             generateObstacles(timestamp);
-
-            // Mettre à jour les obstacles
             updateObstacles();
-
-            // Vérifier les collisions
             checkCollisions();
-
-            // Vérifier les paliers
             checkMilestones();
 
-            // Augmenter la difficulté progressivement (après le mode facile)
             if (!state.easyMode && state.currentSpeed < CONFIG.maxSpeed) {
                 state.currentSpeed += CONFIG.speedIncrease;
             }
 
-            // Vérifier la fin du mode facile (après 15 secondes)
             if (state.easyMode && timestamp - state.easyModeTimer > 15000) {
                 state.easyMode = false;
-                state.currentSpeed = 2.0; // Vitesse après le mode facile
+                state.currentSpeed = 2.0;
             }
 
-            // Continuer la boucle
             requestAnimationFrame(gameLoop);
         }
 
         // ==================== LOUTRE ====================
         function updateLoutre() {
-            // Appliquer la gravité
             state.loutreVelocity += CONFIG.gravity;
             state.loutreY += state.loutreVelocity;
 
-            // Limiter la position de la loutre
             if (state.loutreY < 0) {
                 state.loutreY = 0;
                 state.loutreVelocity = 0;
@@ -549,27 +561,21 @@
             if (state.loutreY > CONFIG.gameHeight - CONFIG.loutreHeight) {
                 state.loutreY = CONFIG.gameHeight - CONFIG.loutreHeight;
                 state.loutreVelocity = 0;
-                if (state.isPlaying) {
-                    gameOver();
-                }
+                if (state.isPlaying) gameOver();
             }
 
-            // Appliquer la position
             loutre.style.top = `${state.loutreY}px`;
-
-            // Rotation de la loutre selon la vélocité
             const rotation = Math.min(Math.max(state.loutreVelocity, -10), 10) * 2;
             loutre.style.transform = `rotate(${rotation}deg)`;
         }
 
         function jump() {
+            if (state.soundEnabled) sounds.jump();
             if (state.doubleJumpAvailable && state.loutreVelocity > 0) {
-                // Double saut
                 state.loutreVelocity = CONFIG.jumpForce * 0.9;
                 state.doubleJumpAvailable = false;
                 skillDoubleJump.style.opacity = '0.6';
             } else if (state.loutreY > 0) {
-                // Saut normal
                 state.loutreVelocity = CONFIG.jumpForce;
             }
         }
@@ -583,13 +589,10 @@
         }
 
         function createObstacle() {
-            // Calculer une hauteur aléatoire pour l'obstacle du haut
             const minHeight = CONFIG.minObstacleHeight;
             const maxHeight = CONFIG.maxObstacleHeight;
             const gap = CONFIG.obstacleGap;
             const totalHeight = CONFIG.gameHeight - gap;
-            
-            // Assurer que l'obstacle du haut a une hauteur valide
             const topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
             const bottomHeight = totalHeight - topHeight;
 
@@ -602,7 +605,6 @@
             obstacleTop.style.height = `${topHeight}px`;
             obstacleBottom.style.height = `${bottomHeight}px`;
 
-            // Les obstacles viennent de la droite (left: -80px) et vont vers la gauche
             obstacleTop.style.left = `${CONFIG.gameWidth}px`;
             obstacleBottom.style.left = `${CONFIG.gameWidth}px`;
 
@@ -622,19 +624,17 @@
                 const obstacle = state.obstacles[i];
                 obstacle.x -= state.currentSpeed;
 
-                // Mettre à jour la position (déplacement de droite à gauche)
                 obstacle.top.style.left = `${obstacle.x}px`;
                 obstacle.bottom.style.left = `${obstacle.x}px`;
 
-                // Vérifier si l'obstacle est passé
                 if (obstacle.x < CONFIG.gameWidth / 4 - CONFIG.obstacleWidth && !obstacle.passed) {
                     obstacle.passed = true;
                     state.score++;
                     state.progress++;
                     updateScore();
+                    if (state.soundEnabled) sounds.info();
                 }
 
-                // Supprimer les obstacles hors écran
                 if (obstacle.x < -CONFIG.obstacleWidth) {
                     gameContainer.removeChild(obstacle.top);
                     gameContainer.removeChild(obstacle.bottom);
@@ -667,7 +667,6 @@
                     height: parseInt(obstacle.bottom.style.height)
                 };
 
-                // Collision avec l'obstacle du haut
                 if (
                     loutreRect.x < topRect.x + topRect.width &&
                     loutreRect.x + loutreRect.width > topRect.x &&
@@ -675,9 +674,9 @@
                     loutreRect.y + loutreRect.height > topRect.y
                 ) {
                     if (!state.shieldActive) {
+                        if (state.soundEnabled) sounds.collision();
                         gameOver();
                     } else {
-                        // Bouclier actif : détruire l'obstacle
                         gameContainer.removeChild(obstacle.top);
                         gameContainer.removeChild(obstacle.bottom);
                         state.obstacles = state.obstacles.filter(o => o !== obstacle);
@@ -687,7 +686,6 @@
                     return;
                 }
 
-                // Collision avec l'obstacle du bas
                 if (
                     loutreRect.x < bottomRect.x + bottomRect.width &&
                     loutreRect.x + loutreRect.width > bottomRect.x &&
@@ -695,9 +693,9 @@
                     loutreRect.y + loutreRect.height > bottomRect.y
                 ) {
                     if (!state.shieldActive) {
+                        if (state.soundEnabled) sounds.collision();
                         gameOver();
                     } else {
-                        // Bouclier actif : détruire l'obstacle
                         gameContainer.removeChild(obstacle.top);
                         gameContainer.removeChild(obstacle.bottom);
                         state.obstacles = state.obstacles.filter(o => o !== obstacle);
@@ -711,7 +709,6 @@
 
         // ==================== MILESTONES ====================
         function checkMilestones() {
-            // Vérifier les infos tech
             for (const info of INFOS_TECH) {
                 if (state.score >= info.milestone && state.score < info.milestone + 1 && state.currentInfoIndex < INFOS_TECH.indexOf(info) + 1) {
                     state.currentInfoIndex = INFOS_TECH.indexOf(info);
@@ -719,7 +716,6 @@
                 }
             }
 
-            // Vérifier les skills
             for (const skill of SKILLS) {
                 if (state.score >= skill.milestone && !state.unlockedSkills.includes(skill.id)) {
                     state.unlockedSkills.push(skill.id);
@@ -727,7 +723,6 @@
                 }
             }
 
-            // Mettre à jour la barre de progression
             updateProgressBar();
         }
 
@@ -771,8 +766,6 @@
         // ==================== SCORE ====================
         function updateScore() {
             scoreElement.textContent = state.score;
-
-            // Mettre à jour le high score
             if (state.score > state.highScore) {
                 state.highScore = state.score;
                 localStorage.setItem('flapotterHighScore', state.highScore);
@@ -781,7 +774,6 @@
 
         // ==================== GAME STATES ====================
         function startGame() {
-            // Réinitialiser l'état
             state = {
                 score: 0,
                 highScore: localStorage.getItem('flapotterHighScore') || 0,
@@ -800,10 +792,10 @@
                 slowMoActive: false,
                 currentSpeed: CONFIG.obstacleSpeed,
                 easyMode: true,
-                easyModeTimer: performance.now()
+                easyModeTimer: performance.now(),
+                soundEnabled: true
             };
 
-            // Réinitialiser l'affichage
             loutre.style.left = `${CONFIG.gameWidth / 4}px`;
             loutre.style.top = `${state.loutreY}px`;
             loutre.style.transform = 'rotate(0deg)';
@@ -811,12 +803,10 @@
             progressBar.style.width = '0%';
             progressText.textContent = '0/5';
 
-            // Cacher les écrans
             startScreen.style.display = 'none';
             gameOverScreen.style.display = 'none';
             infoPopup.style.display = 'none';
 
-            // Réinitialiser les skills
             skillDoubleJump.classList.remove('active');
             skillShield.classList.remove('active');
             skillSlowMo.classList.remove('active');
@@ -824,10 +814,7 @@
             skillShield.style.opacity = '0.6';
             skillSlowMo.style.opacity = '0.6';
 
-            // Supprimer les obstacles existants
             document.querySelectorAll('.obstacle').forEach(el => el.remove());
-
-            // Démarrer la boucle de jeu
             requestAnimationFrame(gameLoop);
         }
 
@@ -855,7 +842,6 @@
                 }
             }
 
-            // Activer les skills avec des touches
             if (state.isPlaying) {
                 if (e.code === 'KeyD' && state.unlockedSkills.includes('double-jump')) {
                     state.doubleJumpAvailable = true;
@@ -871,13 +857,16 @@
                 }
                 if (e.code === 'KeyF' && state.unlockedSkills.includes('slow-mo')) {
                     state.slowMoActive = true;
-                    state.currentSpeed = 1.0; // Ralentit les obstacles
+                    state.currentSpeed = 1.0;
                     skillSlowMo.style.opacity = '1';
                     setTimeout(() => {
                         state.slowMoActive = false;
                         state.currentSpeed = state.easyMode ? CONFIG.obstacleSpeed : 2.0;
                         skillSlowMo.style.opacity = '0.6';
                     }, 5000);
+                }
+                if (e.code === 'KeyM') {
+                    state.soundEnabled = !state.soundEnabled;
                 }
             }
         }
@@ -890,41 +879,6 @@
             } else if (!state.isPlaying && !state.gameOver) {
                 startGame();
             }
-        }
-
-        // ==================== CLOUDS ====================
-        function generateClouds() {
-            const clouds = document.querySelectorAll('.cloud');
-            clouds.forEach(cloud => {
-                const width = parseInt(cloud.style.width);
-                const height = parseInt(cloud.style.height);
-                
-                // Ajouter des parties aux nuages
-                cloud.style.position = 'absolute';
-                cloud.style.background = 'white';
-                cloud.style.borderRadius = '50px';
-                cloud.style.opacity = '0.8';
-
-                // Partie gauche
-                const leftPart = document.createElement('div');
-                leftPart.style.position = 'absolute';
-                leftPart.style.width = `${width / 2}px`;
-                leftPart.style.height = `${height}px`;
-                leftPart.style.background = 'white';
-                leftPart.style.borderRadius = '50px';
-                leftPart.style.left = `${-width / 4}px`;
-                cloud.appendChild(leftPart);
-
-                // Partie droite
-                const rightPart = document.createElement('div');
-                rightPart.style.position = 'absolute';
-                rightPart.style.width = `${width / 2}px`;
-                rightPart.style.height = `${height}px`;
-                rightPart.style.background = 'white';
-                rightPart.style.borderRadius = '50px';
-                rightPart.style.right = `${-width / 4}px`;
-                cloud.appendChild(rightPart);
-            });
         }
 
         // ==================== START ====================
