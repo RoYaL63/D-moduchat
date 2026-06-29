@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flapotter - La Loutre Tech</title>
+    <style>
+        /* Reset et base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #1E90FF);
+            color: #333;
+            overflow: hidden;
+            user-select: none;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Conteneur du jeu */
+        #game-container {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            background: linear-gradient(to bottom, #4682B4, #5F9EA0);
+            border: 4px solid #2E8B57;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* UI en haut */
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px;
+            z-index: 100;
+        }
+
+        #score {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        #progress-container {
+            width: 200px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #FFD700, #FFA500);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        #progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Loutre */
+        #loutre {
+            position: absolute;
+            width: 50px;
+            height: 40px;
+            background: #8B4513;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            z-index: 10;
+            left: 50px;
+            top: 300px;
+            transition: transform 0.1s ease;
+        }
+
+        #loutre::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #CD853F;
+            border-radius: 50%;
+            top: 5px;
+            left: 5px;
+        }
+
+        #loutre::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 15px;
+            background: #A0522D;
+            border-radius: 0 0 30px 30px;
+            bottom: -5px;
+            left: 10px;
+        }
+
+        /* Obstacles (algues) */
+        .obstacle {
+            position: absolute;
+            width: 60px;
+            background: linear-gradient(to bottom, #228B22, #32CD32);
+            border-radius: 5px;
+            right: -60px;
+        }
+
+        .obstacle.top {
+            height: 200px;
+            top: 0;
+        }
+
+        .obstacle.bottom {
+            height: 200px;
+            bottom: 0;
+        }
+
+        /* Info Tech Popup */
+        #info-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #FFD700;
+            border-radius: 15px;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            display: none;
+        }
+
+        #info-popup h2 {
+            color: #FF8C00;
+            margin-bottom: 10px;
+        }
+
+        #info-popup p {
+            color: #333;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        #info-popup button {
+            background: #FFD700;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+
+        #info-popup button:hover {
+            background: #FFA500;
+        }
+
+        /* Skills */
+        #skills {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .skill {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #FFD700;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+
+        .skill.active {
+            opacity: 1;
+            background: rgba(255, 215, 0, 0.3);
+        }
+
+        .skill img {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Écran de fin */
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            display: none;
+        }
+
+        #game-over h1 {
+            color: #FFD700;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        #game-over button {
+            background: #FFD700;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #game-over button:hover {
+            background: #FFA500;
+        }
+
+        /* Écran de démarrage */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+        }
+
+        #start-screen h1 {
+            color: #FFD700;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        #start-screen p {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 300px;
+        }
+
+        #start-screen button {
+            background: #FFD700;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #start-screen button:hover {
+            background: #FFA500;
+        }
+
+        /* Nuages (décor) */
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.7;
+            z-index: 1;
+        }
+
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- UI -->
+        <div id="ui">
+            <div id="score">0</div>
+            <div id="progress-container">
+                <div id="progress-bar"></div>
+                <div id="progress-text">0/5</div>
+            </div>
+        </div>
+
+        <!-- Loutre -->
+        <div id="loutre"></div>
+
+        <!-- Skills -->
+        <div id="skills">
+            <div class="skill" id="skill-double-jump" title="Double saut">↑↑</div>
+            <div class="skill" id="skill-shield" title="Bouclier">🛡️</div>
+            <div class="skill" id="skill-slow-mo" title="Ralentissement">⏳</div>
+        </div>
+
+        <!-- Info Popup -->
+        <div id="info-popup">
+            <h2>💡 Info Tech !</h2>
+            <p id="info-text">Débloque des points pour en savoir plus !</p>
+            <button id="close-info">Super !</button>
+        </div>
+
+        <!-- Écran de démarrage -->
+        <div id="start-screen">
+            <h1>Flapotter</h1>
+            <p>Aide la loutre à éviter les algues et à collecter des infos tech !</p>
+            <button id="start-button">Jouer</button>
+        </div>
+
+        <!-- Écran de fin -->
+        <div id="game-over">
+            <h1>Game Over !</h1>
+            <p id="final-score">Score : 0</p>
+            <button id="restart-button">Recommencer</button>
+        </div>
+
+        <!-- Nuages (décor) -->
+        <div class="cloud" style="width: 100px; height: 30px; top: 50px; left: -50px;"></div>
+        <div class="cloud" style="width: 80px; height: 25px; top: 100px; right: -40px;"></div>
+        <div class="cloud" style="width: 120px; height: 40px; top: 200px; left: -60px;"></div>
+    </div>
+
+    <script>
+        // ==================== CONFIG ====================
+        const CONFIG = {
+            gravity: 0.5,
+            jumpForce: -10,
+            obstacleSpeed: 2,
+            obstacleGap: 150,
+            obstacleFrequency: 1500, // ms
+            loutreWidth: 50,
+            loutreHeight: 40,
+            gameWidth: 400,
+            gameHeight: 600
+        };
+
+        // ==================== STATE ====================
+        let state = {
+            score: 0,
+            highScore: localStorage.getItem('flapotterHighScore') || 0,
+            isPlaying: false,
+            gameOver: false,
+            loutreY: 300,
+            loutreVelocity: 0,
+            obstacles: [],
+            lastObstacleTime: 0,
+            progress: 0,
+            nextMilestone: 5,
+            unlockedSkills: [],
+            currentInfoIndex: 0,
+            shieldActive: false,
+            doubleJumpAvailable: false,
+            slowMoActive: false
+        };
+
+        // ==================== INFOS TECH ====================
+        const INFOS_TECH = [
+            {
+                milestone: 5,
+                title: "Le HTML",
+                text: "Le HTML est le squelette d'une page web, comme les os pour un corps !"
+            },
+            {
+                milestone: 10,
+                title: "Le CSS",
+                text: "Le CSS, c'est la décoration : couleurs, polices, animations..."
+            },
+            {
+                milestone: 15,
+                title: "JavaScript",
+                text: "JavaScript, c'est le cerveau : il rend les pages interactives !"
+            },
+            {
+                milestone: 20,
+                title: "Les algorithmes",
+                text: "Un algorithme, c'est une recette de cuisine pour un ordinateur."
+            },
+            {
+                milestone: 25,
+                title: "Le Cloud",
+                text: "Le cloud, c'est comme un disque dur, mais sur Internet !"
+            },
+            {
+                milestone: 30,
+                title: "Git",
+                text: "Git, c'est un système pour sauvegarder et partager du code en équipe."
+            },
+            {
+                milestone: 35,
+                title: "Les API",
+                text: "Une API, c'est comme un menu au restaurant : tu commandes, le serveur te sert !"
+            },
+            {
+                milestone: 40,
+                title: "Le Responsive Design",
+                text: "Le responsive design, c'est adapter un site pour mobile, tablette et PC !"
+            }
+        ];
+
+        // ==================== SKILLS ====================
+        const SKILLS = [
+            { milestone: 10, id: 'double-jump', name: "Double saut", icon: "↑↑" },
+            { milestone: 20, id: 'shield', name: "Bouclier", icon: "🛡️" },
+            { milestone: 30, id: 'slow-mo', name: "Ralentissement", icon: "⏳" }
+        ];
+
+        // ==================== DOM ELEMENTS ====================
+        const loutre = document.getElementById('loutre');
+        const scoreElement = document.getElementById('score');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const infoPopup = document.getElementById('info-popup');
+        const infoText = document.getElementById('info-text');
+        const closeInfoButton = document.getElementById('close-info');
+        const gameOverScreen = document.getElementById('game-over');
+        const finalScoreElement = document.getElementById('final-score');
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const gameContainer = document.getElementById('game-container');
+
+        // Skills elements
+        const skillDoubleJump = document.getElementById('skill-double-jump');
+        const skillShield = document.getElementById('skill-shield');
+        const skillSlowMo = document.getElementById('skill-slow-mo');
+
+        // ==================== INIT ====================
+        function init() {
+            // Position initiale de la loutre
+            loutre.style.top = `${state.loutreY}px`;
+            loutre.style.left = `${CONFIG.gameWidth / 4}px`;
+
+            // Écouteurs d'événements
+            document.addEventListener('keydown', handleKeyDown);
+            gameContainer.addEventListener('click', handleClick);
+            startButton.addEventListener('click', startGame);
+            restartButton.addEventListener('click', restartGame);
+            closeInfoButton.addEventListener('click', closeInfoPopup);
+
+            // Générer les nuages
+            generateClouds();
+
+            // Afficher l'écran de démarrage
+            startScreen.style.display = 'flex';
+            gameOverScreen.style.display = 'none';
+        }
+
+        // ==================== GAME LOOP ====================
+        function gameLoop(timestamp) {
+            if (!state.isPlaying) return;
+
+            // Mettre à jour la position de la loutre
+            updateLoutre();
+
+            // Générer des obstacles
+            generateObstacles(timestamp);
+
+            // Mettre à jour les obstacles
+            updateObstacles();
+
+            // Vérifier les collisions
+            checkCollisions();
+
+            // Vérifier les paliers
+            checkMilestones();
+
+            // Continuer la boucle
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ==================== LOUTRE ====================
+        function updateLoutre() {
+            // Appliquer la gravité
+            state.loutreVelocity += CONFIG.gravity;
+            state.loutreY += state.loutreVelocity;
+
+            // Limiter la position de la loutre
+            if (state.loutreY < 0) {
+                state.loutreY = 0;
+                state.loutreVelocity = 0;
+            }
+            if (state.loutreY > CONFIG.gameHeight - CONFIG.loutreHeight) {
+                state.loutreY = CONFIG.gameHeight - CONFIG.loutreHeight;
+                state.loutreVelocity = 0;
+                gameOver();
+            }
+
+            // Appliquer la position
+            loutre.style.top = `${state.loutreY}px`;
+
+            // Rotation de la loutre selon la vélocité
+            const rotation = Math.min(Math.max(state.loutreVelocity, -10), 10) * 2;
+            loutre.style.transform = `rotate(${rotation}deg)`;
+        }
+
+        function jump() {
+            if (state.doubleJumpAvailable && state.loutreVelocity > 0) {
+                // Double saut
+                state.loutreVelocity = CONFIG.jumpForce * 0.8;
+                state.doubleJumpAvailable = false;
+                skillDoubleJump.style.opacity = '0.5';
+            } else if (state.loutreY > 0) {
+                // Saut normal
+                state.loutreVelocity = CONFIG.jumpForce;
+            }
+        }
+
+        // ==================== OBSTACLES ====================
+        function generateObstacles(timestamp) {
+            if (timestamp - state.lastObstacleTime > CONFIG.obstacleFrequency) {
+                createObstacle();
+                state.lastObstacleTime = timestamp;
+            }
+        }
+
+        function createObstacle() {
+            const height = Math.floor(Math.random() * 200) + 100;
+            const obstacleTop = document.createElement('div');
+            const obstacleBottom = document.createElement('div');
+
+            obstacleTop.className = 'obstacle top';
+            obstacleBottom.className = 'obstacle bottom';
+
+            obstacleTop.style.height = `${height}px`;
+            obstacleBottom.style.height = `${CONFIG.gameHeight - height - CONFIG.obstacleGap}px`;
+
+            obstacleTop.style.right = `${-CONFIG.obstacleSpeed * 10}px`;
+            obstacleBottom.style.right = `${-CONFIG.obstacleSpeed * 10}px`;
+
+            gameContainer.appendChild(obstacleTop);
+            gameContainer.appendChild(obstacleBottom);
+
+            state.obstacles.push({
+                top: obstacleTop,
+                bottom: obstacleBottom,
+                passed: false,
+                x: CONFIG.gameWidth
+            });
+        }
+
+        function updateObstacles() {
+            for (let i = state.obstacles.length - 1; i >= 0; i--) {
+                const obstacle = state.obstacles[i];
+                obstacle.x -= CONFIG.obstacleSpeed;
+
+                // Mettre à jour la position
+                obstacle.top.style.right = `${obstacle.x}px`;
+                obstacle.bottom.style.right = `${obstacle.x}px`;
+
+                // Vérifier si l'obstacle est passé
+                if (obstacle.x < CONFIG.gameWidth / 4 - CONFIG.obstacleSpeed && !obstacle.passed) {
+                    obstacle.passed = true;
+                    state.score++;
+                    state.progress++;
+                    updateScore();
+                }
+
+                // Supprimer les obstacles hors écran
+                if (obstacle.x < -60) {
+                    gameContainer.removeChild(obstacle.top);
+                    gameContainer.removeChild(obstacle.bottom);
+                    state.obstacles.splice(i, 1);
+                }
+            }
+        }
+
+        // ==================== COLLISIONS ====================
+        function checkCollisions() {
+            const loutreRect = {
+                x: parseInt(loutre.style.left),
+                y: state.loutreY,
+                width: CONFIG.loutreWidth,
+                height: CONFIG.loutreHeight
+            };
+
+            for (const obstacle of state.obstacles) {
+                const topRect = {
+                    x: CONFIG.gameWidth - obstacle.x - 60,
+                    y: 0,
+                    width: 60,
+                    height: parseInt(obstacle.top.style.height)
+                };
+
+                const bottomRect = {
+                    x: CONFIG.gameWidth - obstacle.x - 60,
+                    y: CONFIG.gameHeight - parseInt(obstacle.bottom.style.height),
+                    width: 60,
+                    height: parseInt(obstacle.bottom.style.height)
+                };
+
+                // Collision avec l'obstacle du haut
+                if (
+                    loutreRect.x < topRect.x + topRect.width &&
+                    loutreRect.x + loutreRect.width > topRect.x &&
+                    loutreRect.y < topRect.y + topRect.height &&
+                    loutreRect.y + loutreRect.height > topRect.y
+                ) {
+                    if (!state.shieldActive) {
+                        gameOver();
+                    } else {
+                        // Bouclier actif : détruire l'obstacle
+                        gameContainer.removeChild(obstacle.top);
+                        gameContainer.removeChild(obstacle.bottom);
+                        state.obstacles = state.obstacles.filter(o => o !== obstacle);
+                        state.shieldActive = false;
+                        skillShield.style.opacity = '0.5';
+                    }
+                    return;
+                }
+
+                // Collision avec l'obstacle du bas
+                if (
+                    loutreRect.x < bottomRect.x + bottomRect.width &&
+                    loutreRect.x + loutreRect.width > bottomRect.x &&
+                    loutreRect.y < bottomRect.y + bottomRect.height &&
+                    loutreRect.y + loutreRect.height > bottomRect.y
+                ) {
+                    if (!state.shieldActive) {
+                        gameOver();
+                    } else {
+                        // Bouclier actif : détruire l'obstacle
+                        gameContainer.removeChild(obstacle.top);
+                        gameContainer.removeChild(obstacle.bottom);
+                        state.obstacles = state.obstacles.filter(o => o !== obstacle);
+                        state.shieldActive = false;
+                        skillShield.style.opacity = '0.5';
+                    }
+                    return;
+                }
+            }
+        }
+
+        // ==================== MILESTONES ====================
+        function checkMilestones() {
+            // Vérifier les infos tech
+            for (const info of INFOS_TECH) {
+                if (state.score >= info.milestone && state.score < info.milestone + 1 && state.currentInfoIndex < INFOS_TECH.indexOf(info) + 1) {
+                    state.currentInfoIndex = INFOS_TECH.indexOf(info);
+                    showInfoPopup(info);
+                }
+            }
+
+            // Vérifier les skills
+            for (const skill of SKILLS) {
+                if (state.score >= skill.milestone && !state.unlockedSkills.includes(skill.id)) {
+                    state.unlockedSkills.push(skill.id);
+                    unlockSkill(skill);
+                }
+            }
+
+            // Mettre à jour la barre de progression
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            const progress = state.score % state.nextMilestone;
+            const percentage = (progress / state.nextMilestone) * 100;
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${progress}/${state.nextMilestone}`;
+        }
+
+        function showInfoPopup(info) {
+            infoText.textContent = info.text;
+            infoPopup.style.display = 'block';
+            state.isPlaying = false;
+        }
+
+        function closeInfoPopup() {
+            infoPopup.style.display = 'none';
+            state.isPlaying = true;
+            requestAnimationFrame(gameLoop);
+        }
+
+        function unlockSkill(skill) {
+            switch (skill.id) {
+                case 'double-jump':
+                    state.doubleJumpAvailable = true;
+                    skillDoubleJump.classList.add('active');
+                    skillDoubleJump.style.opacity = '1';
+                    break;
+                case 'shield':
+                    skillShield.classList.add('active');
+                    skillShield.style.opacity = '1';
+                    break;
+                case 'slow-mo':
+                    skillSlowMo.classList.add('active');
+                    skillSlowMo.style.opacity = '1';
+                    break;
+            }
+        }
+
+        // ==================== SCORE ====================
+        function updateScore() {
+            scoreElement.textContent = state.score;
+
+            // Mettre à jour le high score
+            if (state.score > state.highScore) {
+                state.highScore = state.score;
+                localStorage.setItem('flapotterHighScore', state.highScore);
+            }
+        }
+
+        // ==================== GAME STATES ====================
+        function startGame() {
+            // Réinitialiser l'état
+            state = {
+                score: 0,
+                highScore: localStorage.getItem('flapotterHighScore') || 0,
+                isPlaying: true,
+                gameOver: false,
+                loutreY: 300,
+                loutreVelocity: 0,
+                obstacles: [],
+                lastObstacleTime: 0,
+                progress: 0,
+                nextMilestone: 5,
+                unlockedSkills: [],
+                currentInfoIndex: 0,
+                shieldActive: false,
+                doubleJumpAvailable: false,
+                slowMoActive: false
+            };
+
+            // Réinitialiser l'affichage
+            loutre.style.top = `${state.loutreY}px`;
+            loutre.style.transform = 'rotate(0deg)';
+            scoreElement.textContent = '0';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0/5';
+
+            // Cacher les écrans
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            infoPopup.style.display = 'none';
+
+            // Réinitialiser les skills
+            skillDoubleJump.classList.remove('active');
+            skillShield.classList.remove('active');
+            skillSlowMo.classList.remove('active');
+            skillDoubleJump.style.opacity = '0.5';
+            skillShield.style.opacity = '0.5';
+            skillSlowMo.style.opacity = '0.5';
+
+            // Supprimer les obstacles existants
+            document.querySelectorAll('.obstacle').forEach(el => el.remove());
+
+            // Démarrer la boucle de jeu
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameOver() {
+            state.isPlaying = false;
+            state.gameOver = true;
+            finalScoreElement.textContent = `Score : ${state.score}`;
+            gameOverScreen.style.display = 'flex';
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        // ==================== INPUT ====================
+        function handleKeyDown(e) {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (state.isPlaying) {
+                    jump();
+                } else if (state.gameOver) {
+                    restartGame();
+                } else if (!state.isPlaying && !state.gameOver) {
+                    startGame();
+                }
+            }
+
+            // Activer les skills avec des touches
+            if (state.isPlaying) {
+                if (e.code === 'KeyD' && state.unlockedSkills.includes('double-jump')) {
+                    state.doubleJumpAvailable = true;
+                    skillDoubleJump.style.opacity = '1';
+                }
+                if (e.code === 'KeyS' && state.unlockedSkills.includes('shield')) {
+                    state.shieldActive = true;
+                    skillShield.style.opacity = '1';
+                    setTimeout(() => {
+                        state.shieldActive = false;
+                        skillShield.style.opacity = '0.5';
+                    }, 5000);
+                }
+                if (e.code === 'KeyF' && state.unlockedSkills.includes('slow-mo')) {
+                    state.slowMoActive = true;
+                    CONFIG.obstacleSpeed = 1;
+                    skillSlowMo.style.opacity = '1';
+                    setTimeout(() => {
+                        state.slowMoActive = false;
+                        CONFIG.obstacleSpeed = 2;
+                        skillSlowMo.style.opacity = '0.5';
+                    }, 5000);
+                }
+            }
+        }
+
+        function handleClick(e) {
+            if (state.isPlaying) {
+                jump();
+            } else if (state.gameOver) {
+                restartGame();
+            } else if (!state.isPlaying && !state.gameOver) {
+                startGame();
+            }
+        }
+
+        // ==================== CLOUDS ====================
+        function generateClouds() {
+            const clouds = document.querySelectorAll('.cloud');
+            clouds.forEach(cloud => {
+                const width = parseInt(cloud.style.width);
+                const height = parseInt(cloud.style.height);
+                
+                // Ajouter des parties aux nuages
+                cloud.style.position = 'absolute';
+                cloud.style.background = 'white';
+                cloud.style.borderRadius = '50px';
+                cloud.style.opacity = '0.7';
+
+                // Partie gauche
+                const leftPart = document.createElement('div');
+                leftPart.style.position = 'absolute';
+                leftPart.style.width = `${width / 2}px`;
+                leftPart.style.height = `${height}px`;
+                leftPart.style.background = 'white';
+                leftPart.style.borderRadius = '50px';
+                leftPart.style.left = `${-width / 4}px`;
+                cloud.appendChild(leftPart);
+
+                // Partie droite
+                const rightPart = document.createElement('div');
+                rightPart.style.position = 'absolute';
+                rightPart.style.width = `${width / 2}px`;
+                rightPart.style.height = `${height}px`;
+                rightPart.style.background = 'white';
+                rightPart.style.borderRadius = '50px';
+                rightPart.style.right = `${-width / 4}px`;
+                cloud.appendChild(rightPart);
+            });
+        }
+
+        // ==================== START ====================
+        init();
+    </script>
+</body>
+</html>
