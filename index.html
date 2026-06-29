@@ -110,17 +110,29 @@
         /* Loutre (sprite) */
         #loutre {
             position: absolute;
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             background: url('./assets/images/player/idle.png') no-repeat center;
             background-size: contain;
             z-index: 10;
             left: 100px;
             top: 300px;
-            transition: transform 0.1s ease;
         }
 
-        /* Obstacles (algues) */
+        /* Tuyaux (obstacles) */
+        .pipe {
+            position: absolute;
+            width: 64px;
+            z-index: 5;
+        }
+
+        .pipe.top {
+            top: 0;
+        }
+
+        .pipe.bottom {
+            bottom: 0;
+        }
         .obstacle {
             position: absolute;
             width: 80px;
@@ -385,175 +397,106 @@
 
     <!-- Sons intégrés (Web Audio API) -->
     <script>
-        // ==================== SOUNDS ====================
-        const sounds = {
-            jump: () => {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
-            },
-            collision: () => {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.3);
-            },
-            info: () => {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc1 = audioCtx.createOscillator();
-                const osc2 = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc1.type = 'sine';
-                osc2.type = 'sine';
-                osc1.frequency.setValueAtTime(1000, audioCtx.currentTime);
-                osc2.frequency.setValueAtTime(1300, audioCtx.currentTime);
-                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                osc1.connect(gain);
-                osc2.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc1.start();
-                osc2.start();
-                osc1.stop(audioCtx.currentTime + 0.2);
-                osc2.stop(audioCtx.currentTime + 0.2);
-            },
-            background: null
-        };
-
         // ==================== CONFIG ====================
         const CONFIG = {
-            gravity: 0.4,
-            jumpForce: -8,
-            obstacleSpeed: 1.2,
-            obstacleGap: 250,
-            obstacleFrequency: 2500,
-            obstacleWidth: 64,
-            loutreWidth: 24,
-            loutreHeight: 24,
-            gameWidth: 500,
-            gameHeight: 600,
-            minObstacleHeight: 80,
-            maxObstacleHeight: 200,
-            speedIncrease: 0.0003,
-            maxSpeed: 3.0
+            gravity: 0.25,          // Gravité plus légère
+            jumpForce: -6,         // Saut moins puissant (plus contrôlable)
+            pipeWidth: 64,         // Largeur des tuyaux
+            pipeGap: 180,          // Espace entre les tuyaux (haut/bas)
+            pipeFrequency: 2000,   // Fréquence d'apparition des tuyaux (ms)
+            gameWidth: 500,        // Largeur du jeu
+            gameHeight: 600,       // Hauteur du jeu
+            loutreWidth: 32,       // Largeur de la loutre (correspond au sprite)
+            loutreHeight: 32,      // Hauteur de la loutre
+            speed: 1.5,            // Vitesse de défilement des tuyaux
+            speedIncrease: 0.0001, // Accélération progressive
+            maxSpeed: 2.5          // Vitesse maximale
         };
 
         // ==================== STATE ====================
         let state = {
-            score: 0,
+            loutreY: 300,          // Position Y initiale de la loutre
+            loutreVelocity: 0,     // Vitesse verticale
+            pipes: [],             // Liste des tuyaux
+            score: 0,              // Score
             highScore: localStorage.getItem('flapotterHighScore') || 0,
-            isPlaying: false,
-            gameOver: false,
-            loutreY: 300,
-            loutreVelocity: 0,
-            obstacles: [],
-            lastObstacleTime: 0,
-            progress: 0,
-            nextMilestone: 5,
-            unlockedSkills: [],
-            currentInfoIndex: 0,
-            shieldActive: false,
-            doubleJumpAvailable: false,
-            slowMoActive: false,
-            currentSpeed: CONFIG.obstacleSpeed,
-            easyMode: true,
-            easyModeTimer: 0,
-            soundEnabled: true
+            gameActive: false,     // Le jeu est en cours ?
+            gameOver: false,       // Game Over ?
+            lastPipeTime: 0,       // Dernier temps d'apparition d'un tuyau
+            speed: CONFIG.speed    // Vitesse actuelle
         };
 
-        // ==================== INFOS TECH ====================
-        const INFOS_TECH = [
-            { milestone: 5, title: "Le HTML", text: "Le HTML est le squelette d'une page web, comme les os pour un corps !" },
-            { milestone: 10, title: "Le CSS", text: "Le CSS, c'est la décoration : couleurs, polices, animations..." },
-            { milestone: 15, title: "JavaScript", text: "JavaScript, c'est le cerveau : il rend les pages interactives !" },
-            { milestone: 20, title: "Les algorithmes", text: "Un algorithme, c'est une recette de cuisine pour un ordinateur." },
-            { milestone: 25, title: "Le Cloud", text: "Le cloud, c'est comme un disque dur, mais sur Internet !" },
-            { milestone: 30, title: "Git", text: "Git, c'est un système pour sauvegarder et partager du code en équipe." },
-            { milestone: 35, title: "Les API", text: "Une API, c'est comme un menu au restaurant : tu commandes, le serveur te sert !" },
-            { milestone: 40, title: "Le Responsive Design", text: "Le responsive design, c'est adapter un site pour mobile, tablette et PC !" }
-        ];
-
-        // ==================== SKILLS ====================
-        const SKILLS = [
-            { milestone: 10, id: 'double-jump', name: "Double saut", icon: "↑↑" },
-            { milestone: 20, id: 'shield', name: "Bouclier", icon: "🛡️" },
-            { milestone: 30, id: 'slow-mo', name: "Ralentissement", icon: "⏳" }
-        ];
-
         // ==================== DOM ELEMENTS ====================
-        const loutre = document.getElementById('loutre');
-        const scoreElement = document.getElementById('score');
-        const progressBar = document.getElementById('progress-bar');
-        const progressText = document.getElementById('progress-text');
-        const infoPopup = document.getElementById('info-popup');
-        const infoText = document.getElementById('info-text');
-        const closeInfoButton = document.getElementById('close-info');
-        const gameOverScreen = document.getElementById('game-over');
-        const finalScoreElement = document.getElementById('final-score');
-        const startScreen = document.getElementById('start-screen');
-        const startButton = document.getElementById('start-button');
-        const restartButton = document.getElementById('restart-button');
         const gameContainer = document.getElementById('game-container');
-
-        // Skills elements
-        const skillDoubleJump = document.getElementById('skill-double-jump');
-        const skillShield = document.getElementById('skill-shield');
-        const skillSlowMo = document.getElementById('skill-slow-mo');
+        const loutre = document.getElementById('loutre');
+        const scoreDisplay = document.getElementById('score');
+        const gameOverScreen = document.getElementById('game-over');
+        const finalScore = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-button');
 
         // ==================== INIT ====================
         function init() {
-            loutre.style.left = `${CONFIG.gameWidth / 4}px`;
-            loutre.style.top = `${state.loutreY}px`;
+            // Position initiale de la loutre
+            loutre.style.left = '100px';
+            loutre.style.top = state.loutreY + 'px';
+            loutre.style.width = CONFIG.loutreWidth + 'px';
+            loutre.style.height = CONFIG.loutreHeight + 'px';
 
-            document.addEventListener('keydown', handleKeyDown);
-            gameContainer.addEventListener('click', handleClick);
-            startButton.addEventListener('click', startGame);
-            restartButton.addEventListener('click', restartGame);
-            closeInfoButton.addEventListener('click', closeInfoPopup);
+            // Afficher le score
+            scoreDisplay.textContent = 'Score: 0';
 
-            startScreen.style.display = 'flex';
+            // Cacher l'écran de Game Over
             gameOverScreen.style.display = 'none';
+
+            // Réinitialiser l'état
+            state.loutreY = 300;
+            state.loutreVelocity = 0;
+            state.pipes = [];
+            state.score = 0;
+            state.gameActive = false;
+            state.gameOver = false;
+            state.lastPipeTime = 0;
+            state.speed = CONFIG.speed;
+
+            // Supprimer tous les tuyaux existants
+            document.querySelectorAll('.pipe').forEach(pipe => pipe.remove());
         }
 
         // ==================== GAME LOOP ====================
         function gameLoop(timestamp) {
-            if (!state.isPlaying) return;
+            if (!state.gameActive && !state.gameOver) return;
 
+            // Mettre à jour la loutre
             updateLoutre();
-            generateObstacles(timestamp);
-            updateObstacles();
+
+            // Générer des tuyaux
+            if (timestamp - state.lastPipeTime > CONFIG.pipeFrequency) {
+                createPipe();
+                state.lastPipeTime = timestamp;
+            }
+
+            // Mettre à jour les tuyaux
+            updatePipes();
+
+            // Vérifier les collisions
             checkCollisions();
-            checkMilestones();
 
-            if (!state.easyMode && state.currentSpeed < CONFIG.maxSpeed) {
-                state.currentSpeed += CONFIG.speedIncrease;
-            }
+            // Vérifier les points
+            checkScore();
 
-            if (state.easyMode && timestamp - state.easyModeTimer > 15000) {
-                state.easyMode = false;
-                state.currentSpeed = 2.0;
-            }
+            // Augmenter la vitesse progressivement
+            state.speed = Math.min(state.speed + CONFIG.speedIncrease * timestamp, CONFIG.maxSpeed);
 
             requestAnimationFrame(gameLoop);
         }
 
         // ==================== LOUTRE ====================
         function updateLoutre() {
+            // Appliquer la gravité
             state.loutreVelocity += CONFIG.gravity;
             state.loutreY += state.loutreVelocity;
 
+            // Limiter la position Y (ne pas sortir de l'écran)
             if (state.loutreY < 0) {
                 state.loutreY = 0;
                 state.loutreVelocity = 0;
@@ -561,330 +504,186 @@
             if (state.loutreY > CONFIG.gameHeight - CONFIG.loutreHeight) {
                 state.loutreY = CONFIG.gameHeight - CONFIG.loutreHeight;
                 state.loutreVelocity = 0;
-                if (state.isPlaying) gameOver();
+                if (state.gameActive) {
+                    gameOver();
+                }
             }
 
-            loutre.style.top = `${state.loutreY}px`;
-            const rotation = Math.min(Math.max(state.loutreVelocity, -10), 10) * 2;
-            loutre.style.transform = `rotate(${rotation}deg)`;
+            // Mettre à jour la position de la loutre
+            loutre.style.top = state.loutreY + 'px';
         }
 
         function jump() {
-            if (state.soundEnabled) sounds.jump();
-            if (state.doubleJumpAvailable && state.loutreVelocity > 0) {
-                state.loutreVelocity = CONFIG.jumpForce * 0.9;
-                state.doubleJumpAvailable = false;
-                skillDoubleJump.style.opacity = '0.6';
-            } else if (state.loutreY > 0) {
+            if (!state.gameActive && !state.gameOver) {
+                startGame();
+            }
+            if (state.gameActive && !state.gameOver) {
                 state.loutreVelocity = CONFIG.jumpForce;
             }
         }
 
-        // ==================== OBSTACLES ====================
-        function generateObstacles(timestamp) {
-            if (timestamp - state.lastObstacleTime > CONFIG.obstacleFrequency) {
-                createObstacle();
-                state.lastObstacleTime = timestamp;
-            }
-        }
+        // ==================== PIPES ====================
+        function createPipe() {
+            const pipeHeight = Math.floor(Math.random() * (CONFIG.gameHeight - CONFIG.pipeGap - 100)) + 50;
+            const pipeTop = document.createElement('div');
+            const pipeBottom = document.createElement('div');
 
-        function createObstacle() {
-            const minHeight = CONFIG.minObstacleHeight;
-            const maxHeight = CONFIG.maxObstacleHeight;
-            const gap = CONFIG.obstacleGap;
-            const totalHeight = CONFIG.gameHeight - gap;
-            const topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
-            const bottomHeight = totalHeight - topHeight;
+            // Tuyau du haut
+            pipeTop.className = 'pipe top';
+            pipeTop.style.left = CONFIG.gameWidth + 'px';
+            pipeTop.style.width = CONFIG.pipeWidth + 'px';
+            pipeTop.style.height = pipeHeight + 'px';
+            pipeTop.style.background = "url('./assets/images/environment/spike.png') repeat-y";
+            pipeTop.style.backgroundSize = "64px 16px";
 
-            const obstacleTop = document.createElement('div');
-            const obstacleBottom = document.createElement('div');
+            // Tuyau du bas
+            pipeBottom.className = 'pipe bottom';
+            pipeBottom.style.left = CONFIG.gameWidth + 'px';
+            pipeBottom.style.width = CONFIG.pipeWidth + 'px';
+            pipeBottom.style.height = (CONFIG.gameHeight - pipeHeight - CONFIG.pipeGap) + 'px';
+            pipeBottom.style.bottom = '0';
+            pipeBottom.style.background = "url('./assets/images/environment/spike.png') repeat-y";
+            pipeBottom.style.backgroundSize = "64px 16px";
 
-            obstacleTop.className = 'obstacle top';
-            obstacleBottom.className = 'obstacle bottom';
+            // Ajouter les tuyaux au conteneur
+            gameContainer.appendChild(pipeTop);
+            gameContainer.appendChild(pipeBottom);
 
-            obstacleTop.style.height = `${topHeight}px`;
-            obstacleBottom.style.height = `${bottomHeight}px`;
-
-            obstacleTop.style.left = `${CONFIG.gameWidth}px`;
-            obstacleBottom.style.left = `${CONFIG.gameWidth}px`;
-
-            gameContainer.appendChild(obstacleTop);
-            gameContainer.appendChild(obstacleBottom);
-
-            state.obstacles.push({
-                top: obstacleTop,
-                bottom: obstacleBottom,
+            // Ajouter à la liste des tuyaux
+            state.pipes.push({
+                x: CONFIG.gameWidth,
+                top: pipeTop,
+                bottom: pipeBottom,
                 passed: false,
-                x: CONFIG.gameWidth
+                height: pipeHeight
             });
         }
 
-        function updateObstacles() {
-            for (let i = state.obstacles.length - 1; i >= 0; i--) {
-                const obstacle = state.obstacles[i];
-                obstacle.x -= state.currentSpeed;
+        function updatePipes() {
+            for (let i = state.pipes.length - 1; i >= 0; i--) {
+                const pipe = state.pipes[i];
+                pipe.x -= state.speed;
+                pipe.top.style.left = pipe.x + 'px';
+                pipe.bottom.style.left = pipe.x + 'px';
 
-                obstacle.top.style.left = `${obstacle.x}px`;
-                obstacle.bottom.style.left = `${obstacle.x}px`;
-
-                if (obstacle.x < CONFIG.gameWidth / 4 - CONFIG.obstacleWidth && !obstacle.passed) {
-                    obstacle.passed = true;
-                    state.score++;
-                    state.progress++;
-                    updateScore();
-                    if (state.soundEnabled) sounds.info();
-                }
-
-                if (obstacle.x < -CONFIG.obstacleWidth) {
-                    gameContainer.removeChild(obstacle.top);
-                    gameContainer.removeChild(obstacle.bottom);
-                    state.obstacles.splice(i, 1);
+                // Supprimer les tuyaux hors de l'écran
+                if (pipe.x < -CONFIG.pipeWidth) {
+                    gameContainer.removeChild(pipe.top);
+                    gameContainer.removeChild(pipe.bottom);
+                    state.pipes.splice(i, 1);
                 }
             }
         }
 
         // ==================== COLLISIONS ====================
         function checkCollisions() {
-            // Ajout d'une marge de 2px pour éviter les collisions trop sensibles
-            const margin = 2;
             const loutreRect = {
-                x: parseInt(loutre.style.left) + margin,
-                y: state.loutreY + margin,
-                width: CONFIG.loutreWidth - 2 * margin,
-                height: CONFIG.loutreHeight - 2 * margin
+                x: parseInt(loutre.style.left),
+                y: state.loutreY,
+                width: CONFIG.loutreWidth,
+                height: CONFIG.loutreHeight
             };
 
-            for (const obstacle of state.obstacles) {
+            // Vérifier les collisions avec les tuyaux
+            for (const pipe of state.pipes) {
                 const topRect = {
-                    x: obstacle.x,
+                    x: pipe.x,
                     y: 0,
-                    width: CONFIG.obstacleWidth,
-                    height: parseInt(obstacle.top.style.height)
+                    width: CONFIG.pipeWidth,
+                    height: pipe.height
                 };
 
                 const bottomRect = {
-                    x: obstacle.x,
-                    y: CONFIG.gameHeight - parseInt(obstacle.bottom.style.height),
-                    width: CONFIG.obstacleWidth,
-                    height: parseInt(obstacle.bottom.style.height)
+                    x: pipe.x,
+                    y: CONFIG.gameHeight - (CONFIG.gameHeight - pipe.height - CONFIG.pipeGap),
+                    width: CONFIG.pipeWidth,
+                    height: CONFIG.gameHeight - pipe.height - CONFIG.pipeGap
                 };
 
+                // Collision avec le tuyau du haut
                 if (
-                    loutreRect.x < topRect.x + topRect.width &&
                     loutreRect.x + loutreRect.width > topRect.x &&
-                    loutreRect.y < topRect.y + topRect.height &&
-                    loutreRect.y + loutreRect.height > topRect.y
+                    loutreRect.x < topRect.x + topRect.width &&
+                    loutreRect.y + loutreRect.height > topRect.y &&
+                    loutreRect.y < topRect.y + topRect.height
                 ) {
-                    if (!state.shieldActive) {
-                        if (state.soundEnabled) sounds.collision();
-                        gameOver();
-                    } else {
-                        gameContainer.removeChild(obstacle.top);
-                        gameContainer.removeChild(obstacle.bottom);
-                        state.obstacles = state.obstacles.filter(o => o !== obstacle);
-                        state.shieldActive = false;
-                        skillShield.style.opacity = '0.6';
-                    }
+                    gameOver();
                     return;
                 }
 
+                // Collision avec le tuyau du bas
                 if (
-                    loutreRect.x < bottomRect.x + bottomRect.width &&
                     loutreRect.x + loutreRect.width > bottomRect.x &&
-                    loutreRect.y < bottomRect.y + bottomRect.height &&
-                    loutreRect.y + loutreRect.height > bottomRect.y
+                    loutreRect.x < bottomRect.x + bottomRect.width &&
+                    loutreRect.y + loutreRect.height > bottomRect.y &&
+                    loutreRect.y < bottomRect.y + bottomRect.height
                 ) {
-                    if (!state.shieldActive) {
-                        if (state.soundEnabled) sounds.collision();
-                        gameOver();
-                    } else {
-                        gameContainer.removeChild(obstacle.top);
-                        gameContainer.removeChild(obstacle.bottom);
-                        state.obstacles = state.obstacles.filter(o => o !== obstacle);
-                        state.shieldActive = false;
-                        skillShield.style.opacity = '0.6';
-                    }
+                    gameOver();
                     return;
                 }
-            }
-        }
-
-        // ==================== MILESTONES ====================
-        function checkMilestones() {
-            for (const info of INFOS_TECH) {
-                if (state.score >= info.milestone && state.score < info.milestone + 1 && state.currentInfoIndex < INFOS_TECH.indexOf(info) + 1) {
-                    state.currentInfoIndex = INFOS_TECH.indexOf(info);
-                    showInfoPopup(info);
-                }
-            }
-
-            for (const skill of SKILLS) {
-                if (state.score >= skill.milestone && !state.unlockedSkills.includes(skill.id)) {
-                    state.unlockedSkills.push(skill.id);
-                    unlockSkill(skill);
-                }
-            }
-
-            updateProgressBar();
-        }
-
-        function updateProgressBar() {
-            const progress = state.score % state.nextMilestone;
-            const percentage = (progress / state.nextMilestone) * 100;
-            progressBar.style.width = `${percentage}%`;
-            progressText.textContent = `${progress}/${state.nextMilestone}`;
-        }
-
-        function showInfoPopup(info) {
-            infoText.textContent = info.text;
-            infoPopup.style.display = 'block';
-            state.isPlaying = false;
-        }
-
-        function closeInfoPopup() {
-            infoPopup.style.display = 'none';
-            state.isPlaying = true;
-            requestAnimationFrame(gameLoop);
-        }
-
-        function unlockSkill(skill) {
-            switch (skill.id) {
-                case 'double-jump':
-                    state.doubleJumpAvailable = true;
-                    skillDoubleJump.classList.add('active');
-                    skillDoubleJump.style.opacity = '1';
-                    break;
-                case 'shield':
-                    skillShield.classList.add('active');
-                    skillShield.style.opacity = '1';
-                    break;
-                case 'slow-mo':
-                    skillSlowMo.classList.add('active');
-                    skillSlowMo.style.opacity = '1';
-                    break;
             }
         }
 
         // ==================== SCORE ====================
-        function updateScore() {
-            scoreElement.textContent = state.score;
-            if (state.score > state.highScore) {
-                state.highScore = state.score;
-                localStorage.setItem('flapotterHighScore', state.highScore);
+        function checkScore() {
+            for (const pipe of state.pipes) {
+                if (!pipe.passed && pipe.x + CONFIG.pipeWidth < parseInt(loutre.style.left)) {
+                    pipe.passed = true;
+                    state.score++;
+                    scoreDisplay.textContent = 'Score: ' + state.score;
+
+                    // Mettre à jour le high score
+                    if (state.score > state.highScore) {
+                        state.highScore = state.score;
+                        localStorage.setItem('flapotterHighScore', state.highScore);
+                    }
+                }
             }
         }
 
-        // ==================== GAME STATES ====================
-        function startGame() {
-            state = {
-                score: 0,
-                highScore: localStorage.getItem('flapotterHighScore') || 0,
-                isPlaying: true,
-                gameOver: false,
-                loutreY: 300,
-                loutreVelocity: 0,
-                obstacles: [],
-                lastObstacleTime: 0,
-                progress: 0,
-                nextMilestone: 5,
-                unlockedSkills: [],
-                currentInfoIndex: 0,
-                shieldActive: false,
-                doubleJumpAvailable: false,
-                slowMoActive: false,
-                currentSpeed: CONFIG.obstacleSpeed,
-                easyMode: true,
-                easyModeTimer: performance.now(),
-                soundEnabled: true
-            };
-
-            loutre.style.left = `${CONFIG.gameWidth / 4}px`;
-            loutre.style.top = `${state.loutreY}px`;
-            loutre.style.transform = 'rotate(0deg)';
-            scoreElement.textContent = '0';
-            progressBar.style.width = '0%';
-            progressText.textContent = '0/5';
-
-            startScreen.style.display = 'none';
-            gameOverScreen.style.display = 'none';
-            infoPopup.style.display = 'none';
-
-            skillDoubleJump.classList.remove('active');
-            skillShield.classList.remove('active');
-            skillSlowMo.classList.remove('active');
-            skillDoubleJump.style.opacity = '0.6';
-            skillShield.style.opacity = '0.6';
-            skillSlowMo.style.opacity = '0.6';
-
-            document.querySelectorAll('.obstacle').forEach(el => el.remove());
-            requestAnimationFrame(gameLoop);
-        }
-
+        // ==================== GAME OVER ====================
         function gameOver() {
-            state.isPlaying = false;
+            state.gameActive = false;
             state.gameOver = true;
-            finalScoreElement.textContent = `Score : ${state.score}`;
+            finalScore.textContent = state.score;
             gameOverScreen.style.display = 'flex';
         }
 
-        function restartGame() {
-            startGame();
+        // ==================== START GAME ====================
+        function startGame() {
+            state.gameActive = true;
+            state.gameOver = false;
+            state.loutreY = 300;
+            state.loutreVelocity = 0;
+            state.pipes = [];
+            state.score = 0;
+            state.speed = CONFIG.speed;
+            state.lastPipeTime = 0;
+            scoreDisplay.textContent = 'Score: 0';
+            gameOverScreen.style.display = 'none';
+            document.querySelectorAll('.pipe').forEach(pipe => pipe.remove());
+            requestAnimationFrame(gameLoop);
         }
 
-        // ==================== INPUT ====================
-        function handleKeyDown(e) {
+        // ==================== EVENTS ====================
+        document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
-                if (state.isPlaying) {
-                    jump();
-                } else if (state.gameOver) {
-                    restartGame();
-                } else if (!state.isPlaying && !state.gameOver) {
-                    startGame();
-                }
-            }
-
-            if (state.isPlaying) {
-                if (e.code === 'KeyD' && state.unlockedSkills.includes('double-jump')) {
-                    state.doubleJumpAvailable = true;
-                    skillDoubleJump.style.opacity = '1';
-                }
-                if (e.code === 'KeyS' && state.unlockedSkills.includes('shield')) {
-                    state.shieldActive = true;
-                    skillShield.style.opacity = '1';
-                    setTimeout(() => {
-                        state.shieldActive = false;
-                        skillShield.style.opacity = '0.6';
-                    }, 5000);
-                }
-                if (e.code === 'KeyF' && state.unlockedSkills.includes('slow-mo')) {
-                    state.slowMoActive = true;
-                    state.currentSpeed = 1.0;
-                    skillSlowMo.style.opacity = '1';
-                    setTimeout(() => {
-                        state.slowMoActive = false;
-                        state.currentSpeed = state.easyMode ? CONFIG.obstacleSpeed : 2.0;
-                        skillSlowMo.style.opacity = '0.6';
-                    }, 5000);
-                }
-                if (e.code === 'KeyM') {
-                    state.soundEnabled = !state.soundEnabled;
-                }
-            }
-        }
-
-        function handleClick(e) {
-            if (state.isPlaying) {
                 jump();
-            } else if (state.gameOver) {
-                restartGame();
-            } else if (!state.isPlaying && !state.gameOver) {
-                startGame();
             }
-        }
+        });
 
-        // ==================== START ====================
+        document.addEventListener('click', () => {
+            jump();
+        });
+
+        restartButton.addEventListener('click', () => {
+            init();
+        });
+
+        // Initialiser le jeu
         init();
     </script>
+
 </body>
 </html>
