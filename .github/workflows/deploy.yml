@@ -3,8 +3,7 @@ name: Deploy Flapotter to GitHub Pages
 on:
   push:
     branches:
-      - main
-      - vibe/flapotter-mvp-8fd554
+      - gh-pages
     paths-ignore:
       - '**.md'
       - '.gitignore'
