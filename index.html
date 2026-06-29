@@ -27,7 +27,7 @@
         /* Conteneur du jeu */
         #game-container {
             position: relative;
-            width: 400px;
+            width: 500px;
             height: 600px;
             background: linear-gradient(to bottom, #4682B4, #5F9EA0);
             border: 4px solid #2E8B57;
@@ -83,57 +83,37 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
         }
 
-        /* Loutre */
+        /* Loutre (remplacée par un emoji 🦦) */
         #loutre {
             position: absolute;
-            width: 50px;
-            height: 40px;
-            background: #8B4513;
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            width: 60px;
+            height: 60px;
+            font-size: 50px;
             z-index: 10;
-            left: 50px;
+            left: 100px;
             top: 300px;
             transition: transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        #loutre::before {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #CD853F;
-            border-radius: 50%;
-            top: 5px;
-            left: 5px;
-        }
-
-        #loutre::after {
-            content: '';
-            position: absolute;
-            width: 30px;
-            height: 15px;
-            background: #A0522D;
-            border-radius: 0 0 30px 30px;
-            bottom: -5px;
-            left: 10px;
-        }
-
-        /* Obstacles (algues) */
+        /* Obstacles (algues) - élargis et plus espacés */
         .obstacle {
             position: absolute;
-            width: 60px;
+            width: 80px;
             background: linear-gradient(to bottom, #228B22, #32CD32);
             border-radius: 5px;
-            right: -60px;
+            left: -80px;
         }
 
         .obstacle.top {
-            height: 200px;
+            height: 180px;
             top: 0;
         }
 
         .obstacle.bottom {
-            height: 200px;
+            height: 180px;
             bottom: 0;
         }
 
@@ -143,11 +123,11 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border: 3px solid #FFD700;
             border-radius: 15px;
-            padding: 20px;
-            width: 300px;
+            padding: 25px;
+            width: 350px;
             text-align: center;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             z-index: 200;
@@ -156,61 +136,60 @@
 
         #info-popup h2 {
             color: #FF8C00;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 24px;
         }
 
         #info-popup p {
             color: #333;
             font-size: 16px;
-            line-height: 1.5;
+            line-height: 1.6;
+            margin-bottom: 20px;
         }
 
         #info-popup button {
             background: #FFD700;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
-            margin-top: 15px;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
         }
 
         #info-popup button:hover {
             background: #FFA500;
+            transform: scale(1.05);
         }
 
         /* Skills */
         #skills {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
+            bottom: 15px;
+            left: 15px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             z-index: 100;
         }
 
         .skill {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.3);
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.4);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             border: 2px solid #FFD700;
-            opacity: 0.5;
-            transition: opacity 0.3s;
+            opacity: 0.6;
+            transition: all 0.3s;
+            font-size: 20px;
         }
 
         .skill.active {
             opacity: 1;
-            background: rgba(255, 215, 0, 0.3);
-        }
-
-        .skill img {
-            width: 24px;
-            height: 24px;
+            background: rgba(255, 215, 0, 0.4);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
         }
 
         /* Écran de fin */
@@ -220,7 +199,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -233,21 +212,31 @@
             color: #FFD700;
             font-size: 48px;
             margin-bottom: 20px;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
+        }
+
+        #game-over p {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
         }
 
         #game-over button {
             background: #FFD700;
             border: none;
-            padding: 12px 25px;
+            padding: 12px 30px;
             border-radius: 10px;
             font-size: 20px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         #game-over button:hover {
             background: #FFA500;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
 
         /* Écran de démarrage */
@@ -257,7 +246,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -267,9 +256,9 @@
 
         #start-screen h1 {
             color: #FFD700;
-            font-size: 48px;
+            font-size: 56px;
             margin-bottom: 20px;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
         }
 
         #start-screen p {
@@ -277,21 +266,25 @@
             font-size: 18px;
             margin-bottom: 30px;
             text-align: center;
-            max-width: 300px;
+            max-width: 350px;
+            line-height: 1.6;
         }
 
         #start-screen button {
             background: #FFD700;
             border: none;
-            padding: 12px 25px;
+            padding: 12px 30px;
             border-radius: 10px;
             font-size: 20px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         #start-screen button:hover {
             background: #FFA500;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
 
         /* Nuages (décor) */
@@ -299,7 +292,7 @@
             position: absolute;
             background: white;
             border-radius: 50px;
-            opacity: 0.7;
+            opacity: 0.8;
             z-index: 1;
         }
 
@@ -309,6 +302,17 @@
             position: absolute;
             background: white;
             border-radius: 50px;
+        }
+
+        /* Sol (eau) */
+        #ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(to right, #5F9EA0, #4682B4);
+            z-index: 5;
         }
     </style>
 </head>
@@ -323,8 +327,8 @@
             </div>
         </div>
 
-        <!-- Loutre -->
-        <div id="loutre"></div>
+        <!-- Loutre (emoji 🦦) -->
+        <div id="loutre">🦦</div>
 
         <!-- Skills -->
         <div id="skills">
@@ -332,6 +336,9 @@
             <div class="skill" id="skill-shield" title="Bouclier">🛡️</div>
             <div class="skill" id="skill-slow-mo" title="Ralentissement">⏳</div>
         </div>
+
+        <!-- Sol -->
+        <div id="ground"></div>
 
         <!-- Info Popup -->
         <div id="info-popup">
@@ -343,7 +350,8 @@
         <!-- Écran de démarrage -->
         <div id="start-screen">
             <h1>Flapotter</h1>
-            <p>Aide la loutre à éviter les algues et à collecter des infos tech !</p>
+            <p>Aide la loutre 🦦 à éviter les algues et à collecter des infos tech !<br>
+            <strong>Contrôles :</strong> Espace ou clic pour sauter.</p>
             <button id="start-button">Jouer</button>
         </div>
 
@@ -355,23 +363,28 @@
         </div>
 
         <!-- Nuages (décor) -->
-        <div class="cloud" style="width: 100px; height: 30px; top: 50px; left: -50px;"></div>
-        <div class="cloud" style="width: 80px; height: 25px; top: 100px; right: -40px;"></div>
-        <div class="cloud" style="width: 120px; height: 40px; top: 200px; left: -60px;"></div>
+        <div class="cloud" style="width: 120px; height: 40px; top: 50px; left: 20px;"></div>
+        <div class="cloud" style="width: 100px; height: 30px; top: 120px; right: 30px;"></div>
+        <div class="cloud" style="width: 150px; height: 50px; top: 200px; left: 50px;"></div>
     </div>
 
     <script>
         // ==================== CONFIG ====================
         const CONFIG = {
-            gravity: 0.5,
-            jumpForce: -10,
-            obstacleSpeed: 2,
-            obstacleGap: 150,
-            obstacleFrequency: 1500, // ms
-            loutreWidth: 50,
-            loutreHeight: 40,
-            gameWidth: 400,
-            gameHeight: 600
+            gravity: 0.4,          // Gravité plus légère
+            jumpForce: -8,         // Saut moins puissant (plus contrôlable)
+            obstacleSpeed: 1.5,   // Vitesse initiale plus lente
+            obstacleGap: 200,     // Espacement entre les obstacles plus large
+            obstacleFrequency: 2000, // Fréquence des obstacles plus faible
+            obstacleWidth: 80,    // Largeur des obstacles
+            loutreWidth: 60,
+            loutreHeight: 60,
+            gameWidth: 500,
+            gameHeight: 600,
+            minObstacleHeight: 100, // Hauteur minimale des obstacles
+            maxObstacleHeight: 250, // Hauteur maximale des obstacles
+            speedIncrease: 0.0005, // Augmentation progressive de la vitesse
+            maxSpeed: 3.5         // Vitesse maximale
         };
 
         // ==================== STATE ====================
@@ -390,7 +403,10 @@
             currentInfoIndex: 0,
             shieldActive: false,
             doubleJumpAvailable: false,
-            slowMoActive: false
+            slowMoActive: false,
+            currentSpeed: CONFIG.obstacleSpeed,
+            easyMode: true, // Mode facile activé au début
+            easyModeTimer: 0
         };
 
         // ==================== INFOS TECH ====================
@@ -467,8 +483,8 @@
         // ==================== INIT ====================
         function init() {
             // Position initiale de la loutre
-            loutre.style.top = `${state.loutreY}px`;
             loutre.style.left = `${CONFIG.gameWidth / 4}px`;
+            loutre.style.top = `${state.loutreY}px`;
 
             // Écouteurs d'événements
             document.addEventListener('keydown', handleKeyDown);
@@ -504,6 +520,17 @@
             // Vérifier les paliers
             checkMilestones();
 
+            // Augmenter la difficulté progressivement (après le mode facile)
+            if (!state.easyMode && state.currentSpeed < CONFIG.maxSpeed) {
+                state.currentSpeed += CONFIG.speedIncrease;
+            }
+
+            // Vérifier la fin du mode facile (après 15 secondes)
+            if (state.easyMode && timestamp - state.easyModeTimer > 15000) {
+                state.easyMode = false;
+                state.currentSpeed = 2.0; // Vitesse après le mode facile
+            }
+
             // Continuer la boucle
             requestAnimationFrame(gameLoop);
         }
@@ -522,7 +549,9 @@
             if (state.loutreY > CONFIG.gameHeight - CONFIG.loutreHeight) {
                 state.loutreY = CONFIG.gameHeight - CONFIG.loutreHeight;
                 state.loutreVelocity = 0;
-                gameOver();
+                if (state.isPlaying) {
+                    gameOver();
+                }
             }
 
             // Appliquer la position
@@ -536,9 +565,9 @@
         function jump() {
             if (state.doubleJumpAvailable && state.loutreVelocity > 0) {
                 // Double saut
-                state.loutreVelocity = CONFIG.jumpForce * 0.8;
+                state.loutreVelocity = CONFIG.jumpForce * 0.9;
                 state.doubleJumpAvailable = false;
-                skillDoubleJump.style.opacity = '0.5';
+                skillDoubleJump.style.opacity = '0.6';
             } else if (state.loutreY > 0) {
                 // Saut normal
                 state.loutreVelocity = CONFIG.jumpForce;
@@ -554,18 +583,28 @@
         }
 
         function createObstacle() {
-            const height = Math.floor(Math.random() * 200) + 100;
+            // Calculer une hauteur aléatoire pour l'obstacle du haut
+            const minHeight = CONFIG.minObstacleHeight;
+            const maxHeight = CONFIG.maxObstacleHeight;
+            const gap = CONFIG.obstacleGap;
+            const totalHeight = CONFIG.gameHeight - gap;
+            
+            // Assurer que l'obstacle du haut a une hauteur valide
+            const topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+            const bottomHeight = totalHeight - topHeight;
+
             const obstacleTop = document.createElement('div');
             const obstacleBottom = document.createElement('div');
 
             obstacleTop.className = 'obstacle top';
             obstacleBottom.className = 'obstacle bottom';
 
-            obstacleTop.style.height = `${height}px`;
-            obstacleBottom.style.height = `${CONFIG.gameHeight - height - CONFIG.obstacleGap}px`;
+            obstacleTop.style.height = `${topHeight}px`;
+            obstacleBottom.style.height = `${bottomHeight}px`;
 
-            obstacleTop.style.right = `${-CONFIG.obstacleSpeed * 10}px`;
-            obstacleBottom.style.right = `${-CONFIG.obstacleSpeed * 10}px`;
+            // Les obstacles viennent de la droite (left: -80px) et vont vers la gauche
+            obstacleTop.style.left = `${CONFIG.gameWidth}px`;
+            obstacleBottom.style.left = `${CONFIG.gameWidth}px`;
 
             gameContainer.appendChild(obstacleTop);
             gameContainer.appendChild(obstacleBottom);
@@ -581,14 +620,14 @@
         function updateObstacles() {
             for (let i = state.obstacles.length - 1; i >= 0; i--) {
                 const obstacle = state.obstacles[i];
-                obstacle.x -= CONFIG.obstacleSpeed;
+                obstacle.x -= state.currentSpeed;
 
-                // Mettre à jour la position
-                obstacle.top.style.right = `${obstacle.x}px`;
-                obstacle.bottom.style.right = `${obstacle.x}px`;
+                // Mettre à jour la position (déplacement de droite à gauche)
+                obstacle.top.style.left = `${obstacle.x}px`;
+                obstacle.bottom.style.left = `${obstacle.x}px`;
 
                 // Vérifier si l'obstacle est passé
-                if (obstacle.x < CONFIG.gameWidth / 4 - CONFIG.obstacleSpeed && !obstacle.passed) {
+                if (obstacle.x < CONFIG.gameWidth / 4 - CONFIG.obstacleWidth && !obstacle.passed) {
                     obstacle.passed = true;
                     state.score++;
                     state.progress++;
@@ -596,7 +635,7 @@
                 }
 
                 // Supprimer les obstacles hors écran
-                if (obstacle.x < -60) {
+                if (obstacle.x < -CONFIG.obstacleWidth) {
                     gameContainer.removeChild(obstacle.top);
                     gameContainer.removeChild(obstacle.bottom);
                     state.obstacles.splice(i, 1);
@@ -615,16 +654,16 @@
 
             for (const obstacle of state.obstacles) {
                 const topRect = {
-                    x: CONFIG.gameWidth - obstacle.x - 60,
+                    x: obstacle.x,
                     y: 0,
-                    width: 60,
+                    width: CONFIG.obstacleWidth,
                     height: parseInt(obstacle.top.style.height)
                 };
 
                 const bottomRect = {
-                    x: CONFIG.gameWidth - obstacle.x - 60,
+                    x: obstacle.x,
                     y: CONFIG.gameHeight - parseInt(obstacle.bottom.style.height),
-                    width: 60,
+                    width: CONFIG.obstacleWidth,
                     height: parseInt(obstacle.bottom.style.height)
                 };
 
@@ -643,7 +682,7 @@
                         gameContainer.removeChild(obstacle.bottom);
                         state.obstacles = state.obstacles.filter(o => o !== obstacle);
                         state.shieldActive = false;
-                        skillShield.style.opacity = '0.5';
+                        skillShield.style.opacity = '0.6';
                     }
                     return;
                 }
@@ -663,7 +702,7 @@
                         gameContainer.removeChild(obstacle.bottom);
                         state.obstacles = state.obstacles.filter(o => o !== obstacle);
                         state.shieldActive = false;
-                        skillShield.style.opacity = '0.5';
+                        skillShield.style.opacity = '0.6';
                     }
                     return;
                 }
@@ -758,10 +797,14 @@
                 currentInfoIndex: 0,
                 shieldActive: false,
                 doubleJumpAvailable: false,
-                slowMoActive: false
+                slowMoActive: false,
+                currentSpeed: CONFIG.obstacleSpeed,
+                easyMode: true,
+                easyModeTimer: performance.now()
             };
 
             // Réinitialiser l'affichage
+            loutre.style.left = `${CONFIG.gameWidth / 4}px`;
             loutre.style.top = `${state.loutreY}px`;
             loutre.style.transform = 'rotate(0deg)';
             scoreElement.textContent = '0';
@@ -777,9 +820,9 @@
             skillDoubleJump.classList.remove('active');
             skillShield.classList.remove('active');
             skillSlowMo.classList.remove('active');
-            skillDoubleJump.style.opacity = '0.5';
-            skillShield.style.opacity = '0.5';
-            skillSlowMo.style.opacity = '0.5';
+            skillDoubleJump.style.opacity = '0.6';
+            skillShield.style.opacity = '0.6';
+            skillSlowMo.style.opacity = '0.6';
 
             // Supprimer les obstacles existants
             document.querySelectorAll('.obstacle').forEach(el => el.remove());
@@ -823,17 +866,17 @@
                     skillShield.style.opacity = '1';
                     setTimeout(() => {
                         state.shieldActive = false;
-                        skillShield.style.opacity = '0.5';
+                        skillShield.style.opacity = '0.6';
                     }, 5000);
                 }
                 if (e.code === 'KeyF' && state.unlockedSkills.includes('slow-mo')) {
                     state.slowMoActive = true;
-                    CONFIG.obstacleSpeed = 1;
+                    state.currentSpeed = 1.0; // Ralentit les obstacles
                     skillSlowMo.style.opacity = '1';
                     setTimeout(() => {
                         state.slowMoActive = false;
-                        CONFIG.obstacleSpeed = 2;
-                        skillSlowMo.style.opacity = '0.5';
+                        state.currentSpeed = state.easyMode ? CONFIG.obstacleSpeed : 2.0;
+                        skillSlowMo.style.opacity = '0.6';
                     }, 5000);
                 }
             }
@@ -860,7 +903,7 @@
                 cloud.style.position = 'absolute';
                 cloud.style.background = 'white';
                 cloud.style.borderRadius = '50px';
-                cloud.style.opacity = '0.7';
+                cloud.style.opacity = '0.8';
 
                 // Partie gauche
                 const leftPart = document.createElement('div');
