@@ -1,0 +1,6 @@
+# Configuration pour GitHub Pages
+# Déploie automatiquement le dossier /flapotter comme site statique
+
+source:
+  branch: vibe/flapotter-mvp-8fd554
+  path: /flapotter
