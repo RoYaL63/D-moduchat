@@ -436,18 +436,18 @@
         const CONFIG = {
             gravity: 0.4,
             jumpForce: -8,
-            obstacleSpeed: 1.5,
-            obstacleGap: 200,
-            obstacleFrequency: 2000,
-            obstacleWidth: 80,
-            loutreWidth: 40,
-            loutreHeight: 40,
+            obstacleSpeed: 1.2,
+            obstacleGap: 250,
+            obstacleFrequency: 2500,
+            obstacleWidth: 64,
+            loutreWidth: 24,
+            loutreHeight: 24,
             gameWidth: 500,
             gameHeight: 600,
-            minObstacleHeight: 100,
-            maxObstacleHeight: 250,
-            speedIncrease: 0.0005,
-            maxSpeed: 3.5
+            minObstacleHeight: 80,
+            maxObstacleHeight: 200,
+            speedIncrease: 0.0003,
+            maxSpeed: 3.0
         };
 
         // ==================== STATE ====================
@@ -645,11 +645,13 @@
 
         // ==================== COLLISIONS ====================
         function checkCollisions() {
+            // Ajout d'une marge de 2px pour éviter les collisions trop sensibles
+            const margin = 2;
             const loutreRect = {
-                x: parseInt(loutre.style.left),
-                y: state.loutreY,
-                width: CONFIG.loutreWidth,
-                height: CONFIG.loutreHeight
+                x: parseInt(loutre.style.left) + margin,
+                y: state.loutreY + margin,
+                width: CONFIG.loutreWidth - 2 * margin,
+                height: CONFIG.loutreHeight - 2 * margin
             };
 
             for (const obstacle of state.obstacles) {
